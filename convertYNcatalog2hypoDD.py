@@ -1,3 +1,6 @@
+""" Written by Yuan Yao 
+    with python
+"""
 from obspy import UTCDateTime
 import os
 input_filename = r'1.dat'
