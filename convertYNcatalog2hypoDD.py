@@ -32,21 +32,28 @@ def main():
                 #得到标题写到文件
                 date_time = UTCDateTime(values[1] + ' ' + values[2]).strftime('%Y%m%d%H%M%S.%f')[:-4]
                 title = '{},{},{},{},{},{}'.format(date_time,values[3],values[4],values[5],values[6],seq_no)
-                seq_no += 1
-                output_pha.write(title + '\n')
-                output_ctlg.write(title + '\n')
-                print(title)
+                is_title_writed = False
             #跳过标题继续读数据
             i += 1
             while i < len(lines) and not (':' in lines[i] and '/' in lines[i]):
                 #读前两行的数据
                 if not is_ignore and lines[i][0].isalpha():
-                    time1 = get_time(lines[i]) 
+                    time1 = get_time(lines[i])
                     time2 = get_time(lines[i+1])
                     date_time1 = UTCDateTime('{} {}'.format(date, time1))
                     date_time2 = UTCDateTime('{} {}'.format(date, time2))
                     v1, v2 = lines[i].split()[0:2]
-                    output_pha.write('{}.{},{},{},1,1\n'.format(v1, v2, date_time1, date_time2))
+                    #第一行数据有Pg或者Pn，第二行数据必须有Sg，才提取
+                    line1 = lines[i]
+                    line2 = lines[i+1]
+                    if (' Pg ' in line1 or ' Pn ' in line1) and ' Sg ' in line2:
+                        if not is_title_writed:
+                            seq_no += 1
+                            print(title)
+                            is_title_writed = True
+                            output_pha.write(title + '\n')
+                            output_ctlg.write(title + '\n')
+                        output_pha.write('{}.{},{},{},1,1\n'.format(v1, v2, date_time1, date_time2))
                     #跳过其他行数据
                     i += 1
                     while i < len(lines) and not lines[i][0].isalpha():
@@ -61,4 +68,4 @@ def main():
     print('saved:')
     print(os.path.abspath(output_pha_filename))
     print(os.path.abspath(output_ctlg_filename))
-main()    
+main()  
